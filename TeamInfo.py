@@ -5,8 +5,8 @@ import calendar
 import fpdf
 import re
 
-# Get dates
-class ReportGen:
+
+class TeamInfo:
     def __init__(self, team_, month_, year_):
         self.team = team_
         self.month = month_
@@ -30,6 +30,3 @@ class ReportGen:
             return reg['number'], reg['position'], reg['name']
         else:
             return 'NA'
-
-    def get_report(self):
-        return
