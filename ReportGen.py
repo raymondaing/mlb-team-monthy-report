@@ -7,9 +7,9 @@ def create_report(team_data, summary=True):
 
     # Summary Page
     pdf.add_page()
-    pdf.set_font('Times', 'B', 24)
+    pdf.set_font('Times', 'B', 20)
     title = f"{team_data['teamName']}: Snapshot of {team_data['month']:02}/{team_data['year']}"
-    pdf.cell(w=0, h=15, txt=title, ln=1, align='C')
+    pdf.cell(w=0, h=12, txt=title, ln=1, align='C')
 
     ## Record + Run Differential
     pdf.set_font('Times', 'I', 16)
@@ -72,9 +72,71 @@ def create_report(team_data, summary=True):
             else:
                 pdf.cell(20, ch, str(team_standings[i][standing_features[j]]), 1, 0, 'C')
 
+    ## Batting Stats
+    pdf.add_page()
+    stats_eod = team_data['player_stats_eod']
+
+    pdf.set_font('Times', '', 14)
+    pdf.ln()
+    pdf.cell(w=0, h=10, txt=f"Player Batting Stats (As of {team_data['end_date']})", ln=1, align='L')
+
+    ### Table Header
+    batting_features = ['name', 'atBats', 'baseOnBalls', 'strikeOuts', 'hits', 'doubles', 'triples', 'homeRuns', 'runs', 'rbi', 'stolenBases', 'avg', 'obp', 'slg', 'ops']
+    batting_features_titles = ['Name', 'AB', 'BB', 'SO', 'H', '2B', '3B', 'HR', 'R', 'RBI', 'SB', 'AVG', 'OBP', 'SLG', 'OPS']
+    ch = 6
+    pdf.set_font('Times', 'B', 10)
+    for feature in batting_features_titles:
+        if feature == batting_features_titles[-1]:
+            pdf.cell(10, ch, feature, 1, 1, 'C')
+        elif feature == batting_features_titles[0]:
+            pdf.cell(50, ch, feature, 1, 0, 'C')
+        else:
+            pdf.cell(10, ch, feature, 1, 0, 'C')
+
+    ### Table Contents
+    pdf.set_font('Times', '', 10)
+    for player in stats_eod:
+        if player['season_batting'] != '':
+            for j in range(len(batting_features)):
+                if j == len(player['season_batting']) - 1:
+                    pdf.cell(10, ch, str(player['season_batting'][batting_features[j]]), 1, 1, 'C')
+                elif j == 0:
+                        pdf.cell(50, ch, str(player['name']), 1, 0, 'L')
+                else:
+                    pdf.cell(10, ch, str(player['season_batting'][batting_features[j]]), 1, 0, 'C')
+
+    ## Pitching Stats
+    pdf.add_page()
+    pdf.set_font('Times', '', 14)
+    pdf.ln()
+    pdf.cell(w=0, h=10, txt=f"Player Pitching Stats (As of {team_data['end_date']})", ln=1, align='L')
+
+    ### Table Header
+    pitching_features = ['name', 'inningsPitched', 'wins', 'losses', 'atBats', 'baseOnBalls', 'strikeOuts', 'hits', 'doubles', 'triples', 'homeRuns', 'runs', 'earnedRuns', 'stolenBases', 'era', 'obp', 'blownSaves', 'numberOfPitches']
+    pitching_features_titles = ['Name', 'IP', 'W', 'L', 'AB', 'BB', 'SO', 'H', '2B', '3B', 'HR', 'R', 'ER', 'SB', 'ERA', 'OBP', 'BS', 'NP']
+    ch = 6
+    pdf.set_font('Times', 'B', 10)
+    for feature in pitching_features_titles:
+        if feature == pitching_features_titles[-1]:
+            pdf.cell(10, ch, feature, 1, 1, 'C')
+        elif feature == pitching_features_titles[0]:
+            pdf.cell(25, ch, feature, 1, 0, 'C')
+        else:
+            pdf.cell(10, ch, feature, 1, 0, 'C')
+
+    ### Table Contents
+    pdf.set_font('Times', '', 8)
+    for player in stats_eod:
+        if player['season_pitching'] != '':
+            for j in range(len(pitching_features)):
+                if j == len(pitching_features) - 1:
+                    pdf.cell(10, ch, str(player['season_pitching'][pitching_features[j]]), 1, 1, 'C')
+                elif j == 0:
+                        pdf.cell(25, ch, str(player['name']), 1, 0, 'L')
+                else:
+                    pdf.cell(10, ch, str(player['season_pitching'][pitching_features[j]]), 1, 0, 'C')
 
     pdf.output(f"./{team_data['teamCode']}-{team_data['month']:02}-{team_data['year']}.pdf", 'F')
-
 
 class ReportGen(FPDF):
     def __init__(self):
@@ -87,7 +149,7 @@ class ReportGen(FPDF):
     def footer(self):
         self.set_y(-15)
         self.set_font('Arial', '', 12)
-        if self.page_no() == 1:
+        if self.page_no() in [1, 2, 3]:
             self.cell(0, 8, f'Summary', 0, 0, 'C')
         else:
             self.cell(0, 8, f'Page {self.page_no()}', 0, 0, 'C')

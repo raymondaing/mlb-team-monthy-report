@@ -54,4 +54,7 @@ if __name__ == "__main__":
         summary = args.summary
 
     if teamid is not None and month is not None and year is not None:
-        generate_report(teamid, month, year, team_ids, is_summary=summary)
+        try:
+            generate_report(teamid, month, year, team_ids, is_summary=summary)
+        except Exception as e:
+            print(e)

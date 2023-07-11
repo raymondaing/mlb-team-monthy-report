@@ -23,6 +23,7 @@ class TeamInfo:
         self.record = self.__get_win_loss()
         self.run_differential = self.__get_run_differential()
         self.player_stats_to_date = self.__get_current_season_player_stats()
+        self.all_games_player_stats = self.__get_all_season_player_stats()
         self.standings = self.__get_standings()
 
     def __get_number_games(self):
@@ -113,9 +114,11 @@ class TeamInfo:
                     is_batter = False
 
                 if is_batter:
-                    data['season_batting'] = info['seasonStats']['batting']
+                    if info['seasonStats']['batting']['atBats'] > 0:
+                        data['season_batting'] = info['seasonStats']['batting']
                 if is_pitcher:
-                    data['season_pitching'] = info['seasonStats']['pitching']
+                    if info['seasonStats']['pitching']['atBats'] > 0:
+                        data['season_pitching'] = info['seasonStats']['pitching']
                 player_stats.append(data)
             return player_stats
 
@@ -161,7 +164,8 @@ class TeamInfo:
                 "games": self.game_results,
                 "record": self.record,
                 "run_differential": self.run_differential,
-                "player_stats": self.player_stats_to_date,
+                "player_stats_eod": self.player_stats_to_date,
+                "player_stats_all": self.all_games_player_stats,
                 "standings": self.standings
             }
             return info
